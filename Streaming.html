@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botones de Streaming</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://ecdisis.com/wp-content/uploads/2021/01/plataformas-de-streaming-900x506-1.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .contenedor-principal {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 900px;
+            width: 95%;
+        }
+
+        .cerrar-principal-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            z-index: 10;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .cerrar-principal-btn:hover {
+            color: #000;
+        }
+
+        .contenedor-botones {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .boton-imagen {
+            background: white;
+            border: none;
+            padding: 15px;
+            margin: 15px;
+            cursor: pointer;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 180px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0;
+        }
+
+        .boton-imagen:hover {
+            transform: translateY(-5px);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .boton-imagen img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .boton-negro {
+            background-color: #000000;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .boton-negro:hover {
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            margin: 2% auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-iframe-container {
+            flex-grow: 1;
+            overflow: auto;
+            width: 100%;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            text-shadow: 0 0 5px black;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .boton-apple-tv {
+            background-color: black;
+            background-image: url('https://i0.wp.com/pub-f354ec240bea480db7320bd0e29d972e.r2.dev/sites/4/Untitled-21-c6199aa35e300684ffb7.png?fit=1200%2C675&ssl=1');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Estilos para el modal de horario */
+        .horario-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .horario-modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .horario-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .horario-modal-close:hover {
+            color: #000;
+        }
+
+        .horario-modal h2 {
+            color: #d32f2f;
+            margin-top: 0;
+        }
+
+        .horario-modal p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .contenedor-botones {
+                width: 95%;
+            }
+            .boton-imagen {
+                width: calc(50% - 20px);
+                margin: 10px;
+            }
+            
+            .horario-modal-content {
+                padding: 20px;
+            }
+            
+            .horario-modal h2 {
+                font-size: 20px;
+            }
+            
+            .horario-modal p {
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 900px) {
+            .contenedor-botones {
+                width: 90%;
+            }
+            .boton-imagen {
+                width: calc(33.33% - 20px);
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <button class="cerrar-principal-btn" onclick="redirigirPrincipal()">×</button>
+        <div class="contenedor-botones">
+            <button class="boton-imagen" onclick="abrirNetflixModal()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Logonetflix.png" alt="Netflix">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://vendeygana.forms.app/compraflujotv-1')">
+                <img src="https://i.pinimg.com/736x/08/9d/98/089d9850446d4cc695ec988edc565df5.jpg" alt="FlujoTV">
+            </button>
+            <button class="boton-imagen" onclick="abrirDisneyModal()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://vendeygana.forms.app/maxpremium-1')">
+                <img src="https://logodownload.org/wp-content/uploads/2024/03/max-logo.png" alt="Max">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://vendeygana.forms.app/crunchyroll-1')">
+                <img src="https://cdn.worldvectorlogo.com/logos/crunchyroll-1.svg" alt="Crunchyroll">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://online.forms.app/respuestasdereportesdefa/vix')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/ViX_Logo.svg/2560px-ViX_Logo.svg.png" alt="ViX">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://online.forms.app/respuestasdereportesdefa/vikyrakuten')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Rakuten_Viki_Logo_2019.svg/1200px-Rakuten_Viki_Logo_2019.svg.png" alt="Viki">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://online.forms.app/respuestasdereportesdefa/telelatino')">
+                <img src="https://doctor-pandora.odoo.com/web/image/product.template/8/image_1920?unique=889500d" alt="Doctor Pandora">
+            </button>
+            <button class="boton-imagen boton-apple-tv" onclick="abrirModal('https://vendeygana.forms.app/aplletv-1')">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://online.forms.app/respuestasdereportesdefa/paramountplus')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Paramount%2B_logo.png" alt="Paramount+">
+            </button>
+            <button class="boton-imagen" onclick="abrirModal('https://vendeygana.forms.app/amazonprime-1')">
+                <img src="https://cdn.worldvectorlogo.com/logos/amazon-prime-video-1.svg" alt="Amazon Prime Video">
+            </button>
+            <button class="boton-imagen boton-negro" onclick="abrirModal('https://vendeygana.forms.app/panaxtreaming-1')">
+                <img src="https://dhgf5mcbrms62.cloudfront.net/110979006/header-fcHJMd/IVsTzWZ-600x600.webp" alt="Nuevo Servicio">
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Netflix -->
+    <div id="netflixModal" class="modal">
+        <span class="close-btn" onclick="cerrarNetflixModal()">×</span>
+        <div class="modal-content">
+            <div class="modal-iframe-container">
+                <iframe id="netflixFrame" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Disney+ -->
+    <div id="disneyModal" class="modal">
+        <span class="close-btn" onclick="cerrarDisneyModal()">×</span>
+        <div class="modal-content">
+            <div class="modal-iframe-container">
+                <iframe id="disneyFrame" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para contenido de streaming general -->
+    <div id="generalModal" class="modal">
+        <span class="close-btn" onclick="cerrarModal()">×</span>
+        <div class="modal-content">
+            <div class="modal-iframe-container">
+                <iframe id="modalFrame" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para horario de atención -->
+    <div id="horarioModal" class="horario-modal">
+        <div class="horario-modal-content">
+            <span class="horario-modal-close" onclick="cerrarHorarioModal()">×</span>
+            <h2>AVISO IMPORTANTE</h2>
+            <p>ESTIMADO USUARIO: LAS VENTAS DE CUENTAS STREAMING Y RECARGAS DE JUEGOS SE PROCESAN HASTA LAS 10:30 PM DE LUNES A SÁBADO Y SE INICIA SU VENTA DESDE LAS 7 AM. LOS DOMINGOS INICIAN DESDE LAS 9 AM Y HASTA LAS 8 PM.</p>
+            <p>PUEDES HACER TU SOLICITUD EN CUALQUIER MOMENTO, PERO TEN EN CUENTA QUE SERÁ PROCESADA DENTRO DEL HORARIO DE ATENCIÓN.</p>
+        </div>
+    </div>
+
+    <script>
+        function redirigirPrincipal() {
+            window.location.href = 'https://www.vendeygana.net/user/';
+        }
+
+        function abrirNetflixModal() {
+            const modal = document.getElementById('netflixModal');
+            const iframe = document.getElementById('netflixFrame');
+            iframe.src = "https://vendeygana.forms.app/compranet-1";
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        function cerrarNetflixModal() {
+            const modal = document.getElementById('netflixModal');
+            const iframe = document.getElementById('netflixFrame');
+            modal.style.display = "none";
+            iframe.src = "";
+            document.body.style.overflow = "auto";
+        }
+
+        function abrirDisneyModal() {
+            const modal = document.getElementById('disneyModal');
+            const iframe = document.getElementById('disneyFrame');
+            iframe.src = "https://vendeygana.forms.app/disneyplus-1";
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        function cerrarDisneyModal() {
+            const modal = document.getElementById('disneyModal');
+            const iframe = document.getElementById('disneyFrame');
+            modal.style.display = "none";
+            iframe.src = "";
+            document.body.style.overflow = "auto";
+        }
+
+        function abrirModal(url) {
+            const modal = document.getElementById('generalModal');
+            const iframe = document.getElementById('modalFrame');
+            iframe.src = url;
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        function cerrarModal() {
+            const modal = document.getElementById('generalModal');
+            const iframe = document.getElementById('modalFrame');
+            modal.style.display = "none";
+            iframe.src = "";
+            document.body.style.overflow = "auto";
+        }
+
+        function mostrarHorarioModal() {
+            const modal = document.getElementById('horarioModal');
+            modal.style.display = "flex";
+        }
+
+        function cerrarHorarioModal() {
+            const modal = document.getElementById('horarioModal');
+            modal.style.display = "none";
+        }
+
+        function estaEnHorarioNoLaboral() {
+            const ahora = new Date();
+            const horaActual = ahora.getHours();
+            const minutosActual = ahora.getMinutes();
+            const diaSemana = ahora.getDay(); // 0 (Domingo) a 6 (Sábado)
+            
+            // Convertir hora actual a minutos totales para facilitar la comparación
+            const minutosTotales = horaActual * 60 + minutosActual;
+            
+            // Horario de Lunes a Sábado: después de 22:30 (10:30 PM) hasta antes de 7:00 AM
+            if (diaSemana >= 1 && diaSemana <= 6) {
+                if ((minutosTotales >= 22 * 60 + 30) || (minutosTotales < 7 * 60)) {
+                    return true;
+                }
+            }
+            
+            // Domingo: después de 20:00 (8:00 PM) hasta antes de 7:00 AM del Lunes
+            if (diaSemana === 0) {
+                if (minutosTotales >= 20 * 60) {
+                    return true;
+                }
+            }
+            
+            // Lunes: antes de 7:00 AM (continuación del Domingo)
+            if (diaSemana === 1 && minutosTotales < 7 * 60) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('generalModal');
+            if (event.target == modal) {
+                cerrarModal();
+            }
+            
+            const netflixModal = document.getElementById('netflixModal');
+            if (event.target == netflixModal) {
+                cerrarNetflixModal();
+            }
+            
+            const disneyModal = document.getElementById('disneyModal');
+            if (event.target == disneyModal) {
+                cerrarDisneyModal();
+            }
+            
+            const horarioModal = document.getElementById('horarioModal');
+            if (event.target == horarioModal) {
+                cerrarHorarioModal();
+            }
+        }
+
+        // Mostrar el modal de horario al cargar la página si está en horario no laboral
+        window.onload = function() {
+            if (estaEnHorarioNoLaboral()) {
+                mostrarHorarioModal();
+            }
+        }
+    </script>
+    <script type="text/javascript" src="https://smartarget.online/loader.js?u=3a9cb769fbc5bbbff96e2f604c565e13679272a0"></script>
+</body>
+</html>
